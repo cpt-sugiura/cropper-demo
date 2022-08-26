@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Cropper.js ファイルから読み込みデモ</title>
+  <!-- CDNで Cropper.js を取得 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha512-ooSWpxJsiXe6t4+PPjCgYmVfr1NS5QXJACcR/FPpsdm6kqG1FmQ2SVyg2RXeVuCRBLr0lWHnWJP6Zs1Efvxzww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.css" integrity="sha512-+VDbDxc9zesADd49pfvz7CgsOl2xREI/7gnzcdyA9XjuTxLXrdpuz21VVIqc5HPfZji2CypSbxx1lgD7BgBK5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script>
+  document.addEventListener('DOMContentLoaded', function (){
+    document.querySelector('input[name="src-img"]').addEventListener('change', function(changeFileEvent){
+      // 入力された画像ファイルを Cropper で扱う img 要素に渡します
+      // これは入力されたファイルを DataURI にすることでできます
+      const fReaderForURI = new FileReader();
+      fReaderForURI.readAsDataURL(changeFileEvent.target.files[0]);
+      fReaderForURI.onload = () => {
+        // Cropperを用意
+        document.getElementById('cropper-tgt').src = String(fReaderForURI.result);
+      }
+      // 先程同様に Cropper を準備
+      const cropper = new Cropper(
+        document.getElementById('cropper-tgt'),
+        {aspectRatio: 16 / 9}
+      );
+      document.getElementById('btn-crop-action').addEventListener('click', function(){
+        // Cropper インスタンスから現在の切り抜き範囲の画像を canvas 要素として取れます。
+        /** @var {HTMLCanvasElement} croppedCanvas */
+        const croppedCanvas = cropper.getCroppedCanvas();
+        // canvas要素にはimg要素のsrcプロパティに渡した時に画像として表示される形式のデータを返すメソッド toDataURL があります。
+        // これをimg要素に渡すことで切り抜き結果を画面に表示できます。
+        // @see https://developer.mozilla.org/ja/docs/Web/API/HTMLCanvasElement/toDataURL
+        document.getElementById('preview').src = croppedCanvas.toDataURL()
+      })
+    })
+  })
+  </script>
+  <style>
+      .control {
+          display: flex;
+          flex-direction: column;
+          width: fit-content;
+          gap: 8px;
+      }
+  </style>
+</head>
+<body>
+<img id="cropper-tgt">
+<div class="control">
+  <label>画像ファイル<input type="file" name="src-img"></label>
+  <button type="button" id="btn-crop-action">切り取り</button>
+  <img id="preview">
+</div>
+</body>
+</html>

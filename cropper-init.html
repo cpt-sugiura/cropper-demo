@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Cropper.js 起動デモ</title>
+  <!-- CDNで Cropper.js を取得 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha512-ooSWpxJsiXe6t4+PPjCgYmVfr1NS5QXJACcR/FPpsdm6kqG1FmQ2SVyg2RXeVuCRBLr0lWHnWJP6Zs1Efvxzww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.css" integrity="sha512-+VDbDxc9zesADd49pfvz7CgsOl2xREI/7gnzcdyA9XjuTxLXrdpuz21VVIqc5HPfZji2CypSbxx1lgD7BgBK5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script>
+  document.addEventListener('DOMContentLoaded', function (){
+    new Cropper(
+      // 第一引数に Cropper.js をかける画像の要素をセット
+      document.getElementById('cropper-tgt'),
+      {
+        // 第二引数には Cropper.js のオプションをセット
+        // 何ができるかは次のリンクを参照
+        // @see https://github.com/fengyuanchen/cropperjs#options
+        aspectRatio: 16 / 9,
+      }
+    );
+  })
+  </script>
+</head>
+<body>
+<img id="cropper-tgt" src="/assets/img/PHP-logo.svg.webp">
+</body>
+</html>
