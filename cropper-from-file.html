@@ -8,20 +8,25 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.css" integrity="sha512-+VDbDxc9zesADd49pfvz7CgsOl2xREI/7gnzcdyA9XjuTxLXrdpuz21VVIqc5HPfZji2CypSbxx1lgD7BgBK5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
   document.addEventListener('DOMContentLoaded', function (){
+    /** @var {Cropper|null} Cropperインスタンスを保持する関数 */
+    let cropper = null
     document.querySelector('input[name="src-img"]').addEventListener('change', function(changeFileEvent){
+      if(cropper){
+        // 既に Cropper で何がしかの切り抜きをしている場合、それを入れ替えるために既存インスタンスを削除します
+        cropper.destroy();
+      }
       // 入力された画像ファイルを Cropper で扱う img 要素に渡します
-      // これは入力されたファイルを DataURI にすることでできます
+      // FileReader を用いることで入力されたファイルを DataURI にすることでできます
+      // @see https://developer.mozilla.org/ja/docs/Web/API/FileReader/readAsDataURL
       const fReaderForURI = new FileReader();
       fReaderForURI.readAsDataURL(changeFileEvent.target.files[0]);
       fReaderForURI.onload = () => {
-        // Cropperを用意
-        document.getElementById('cropper-tgt').src = String(fReaderForURI.result);
+        // 生成した DataURI を img 要素に渡し、それに対して Cropper を用意します
+        const imgEl = document.getElementById('cropper-tgt');
+        imgEl.src = String(fReaderForURI.result);
+        cropper = new Cropper(imgEl, {aspectRatio: 16 / 9});
       }
-      // 先程同様に Cropper を準備
-      const cropper = new Cropper(
-        document.getElementById('cropper-tgt'),
-        {aspectRatio: 16 / 9}
-      );
+
       document.getElementById('btn-crop-action').addEventListener('click', function(){
         // Cropper インスタンスから現在の切り抜き範囲の画像を canvas 要素として取れます。
         /** @var {HTMLCanvasElement} croppedCanvas */
@@ -30,6 +35,20 @@
         // これをimg要素に渡すことで切り抜き結果を画面に表示できます。
         // @see https://developer.mozilla.org/ja/docs/Web/API/HTMLCanvasElement/toDataURL
         document.getElementById('preview').src = croppedCanvas.toDataURL()
+
+        // canvas 要素には描画されているデータを Blob としてを扱える様にするメソッド toBlob があります。
+        // これを img 要素に渡すことで切り抜き結果を画面に表示できます。
+        // @see https://developer.mozilla.org/ja/docs/Web/API/HTMLCanvasElement/toDataURL
+        croppedCanvas.toBlob(function(imgBlob){
+          // Blob を元に File 化します。
+          const croppedImgFile = new File([imgBlob], '切り抜き画像.png' , {type: "image/png"});
+          // DataTransfer インスタンスを介することで input 要素の　files に
+          // JavaScript 内で作った File を渡せます。
+          // 直に new FileList から作って渡そうとすると失敗します。
+          const dt = new DataTransfer();
+          dt.items.add(croppedImgFile);
+          document.querySelector('input[name="cropped-img"]').files = dt.files;
+        });
       })
     })
   })
@@ -41,14 +60,44 @@
           width: fit-content;
           gap: 8px;
       }
+      #cropper-tgt {
+          max-width: 100%;
+      }
+      .cropper-area {
+          max-width: 60vw;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+      .cropped-form{
+          border-top: dashed 2px black;
+          margin-top: 1em;
+          display: flex;
+          justify-content: center;
+          flex-direction: column;
+          gap: 8px;
+      }
+      .caption {
+          font-weight: bold;
+          font-size: 1.2em;
+      }
   </style>
 </head>
 <body>
-<img id="cropper-tgt">
-<div class="control">
-  <label>画像ファイル<input type="file" name="src-img"></label>
-  <button type="button" id="btn-crop-action">切り取り</button>
-  <img id="preview">
+<div class="cropper-area">
+  <span class="caption">Cropper.jsによる切り抜き</span>
+  <img id="cropper-tgt">
+  <div class="control">
+    <label>画像ファイル<input type="file" name="src-img" accept="image/*"></label>
+    <button type="button" id="btn-crop-action">切り取り</button>
+  </div>
 </div>
+
+<form class="cropped-form" action="" enctype="multipart/form-data" method="post">
+  <span class="caption">送信フォーム</span>
+  <img id="preview">
+  <label>切り抜き後画像ファイル<input type="file" name="cropped-img" accept="image/*"></label>
+  <button type="submit">画像を送信</button>
+</form>
 </body>
 </html>
