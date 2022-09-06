@@ -17,7 +17,7 @@
 <textarea id="observe-tgt"></textarea>
 
 <div>
-  <div id="move-tgt"></div>
+  <div id="change-size-tgt"></div>
 </div>
 
 
@@ -31,16 +31,16 @@ textareaObserver.observe(
   document.querySelector('#observe-tgt')
 );
 
-const moveTgt = document.querySelector('#move-tgt');
+const changeSizeTgt = document.querySelector('#change-size-tgt');
 /**
  * 監視対象要素の大きさが変わるたびに実行される関数
  * @param {ResizeObserverEntry[]} entries
  */
 function resizeHandler(entries) {
   for (let entry of entries) {
-    // 渡された
-    moveTgt.style.height = entry.contentBoxSize[0].blockSize + 'px';
-    moveTgt.style.width = entry.contentBoxSize[0].inlineSize + 'px';
+    // 渡された幅と高さに同期させたい要素の幅と高さを変更する
+    changeSizeTgt.style.height = entry.contentBoxSize[0].blockSize + 'px';
+    changeSizeTgt.style.width = entry.contentBoxSize[0].inlineSize + 'px';
   }
 }
 </script>
