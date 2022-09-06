@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Resize Observer Demo</title>
+  <style>
+    #move-tgt {
+        background: red;
+    }
+    body{
+        display: flex;
+        justify-content: space-around;
+    }
+  </style>
+</head>
+<body>
+<textarea id="observe-tgt"></textarea>
+
+<div>
+  <div id="move-tgt"></div>
+</div>
+
+
+<script>
+// 監視用の ResizeObserver インスタンスを用意
+// 監視対象要素の大きさが変わるたびにこれに渡したコールバックが走る
+const textareaObserver = new ResizeObserver(resizeHandler);
+
+// ResizeObserver インスタンスに監視対象要素を登録
+textareaObserver.observe(
+  document.querySelector('#observe-tgt')
+);
+
+const moveTgt = document.querySelector('#move-tgt');
+/**
+ * 監視対象要素の大きさが変わるたびに実行される関数
+ * @param {ResizeObserverEntry[]} entries
+ */
+function resizeHandler(entries) {
+  for (let entry of entries) {
+    // 渡された
+    moveTgt.style.height = entry.contentBoxSize[0].blockSize + 'px';
+    moveTgt.style.width = entry.contentBoxSize[0].inlineSize + 'px';
+  }
+}
+</script>
+</body>
+</html>
